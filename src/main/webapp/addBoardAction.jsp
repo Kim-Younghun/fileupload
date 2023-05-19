@@ -3,6 +3,7 @@
 <%@ page import="com.oreilly.servlet.multipart.*" %>   
 <%@ page import="vo.*"%>
 <%@ page import="java.io.*" %>
+<%@ page import="java.sql.*" %>
 <%
 	// upload 폴더 경로를 저장
 	String dir = request.getServletContext().getRealPath("/upload");
@@ -59,4 +60,54 @@
 	boardFile.setType(type);
 	boardFile.setOriginFilename(originFilename);
 	boardFile.setSaveFilename(saveFilename);
+	
+	 
+	/* 
+		INSERT INTO board(board_title, member_id, createdate, updatedate)
+		VALUES(?, ?, NOW(), NOW());
+	
+		INSERT INTO board_file(board_no, origin_filename, save_filename, path, type, createdate)
+		VALUES(?, ?, ?, ?, ?, NOW());
+		
+		INSERT쿼리 실행 후 기본키값 받아오기 JDBC API
+		String sql = "INSERT 쿼리문";
+		pstmt = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+		int row = pstmt.executeUpdate(); // insert 쿼리 실행
+		ResultSet keyRs = pstmt.getGeneratedKeys(); // insert 후 입력된 행의 키값을 받아오는 select쿼리를 진행
+		int keyValue = 0;
+		if(keyRs.next()){
+			keyValue = rs.getInt(1);
+		}
+	*/
+	
+	Class.forName("org.mariadb.jdbc.Driver");
+	Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/fileupload", "root", "java1234");
+	String boardSql = "INSERT INTO board(board_title, member_id, createdate, updatedate) VALUES(?, ?, NOW(), NOW())";
+	PreparedStatement boardStmt = conn.prepareStatement(boardSql, PreparedStatement.RETURN_GENERATED_KEYS);
+	boardStmt.setString(1, boardTitle);
+	boardStmt.setString(2, memberId);
+	System.out.println(boardStmt + "addBoardAcion param boardStmt");
+	// board에 입력후 키값저장
+	boardStmt.executeUpdate();
+	// 가장 최근 board_no(Auto Increment)가 저장(반환)된다.
+	ResultSet KeyRs = boardStmt.getGeneratedKeys();
+	int boardNo = 0;
+	// 한번 동작
+	if(KeyRs.next()) {
+		boardNo = KeyRs.getInt(1);
+	}
+	
+	// path경로를 upload으로 저장
+	String fileSql = "INSERT INTO board_file(board_no, origin_filename, save_filename, type, path, createdate) VALUES(?, ?, ?, ?, 'upload', NOW())";
+	PreparedStatement fileStmt = conn.prepareStatement(fileSql);
+	fileStmt.setInt(1, boardNo);
+	fileStmt.setString(2, originFilename);
+	fileStmt.setString(3, saveFilename);
+	fileStmt.setString(4, type);
+	System.out.println(fileStmt + "addBoardAcion param fileStmt");
+	// board_file 입력
+	fileStmt.executeUpdate();
+	
+	// 등록후 보드리스트로 리다이렉션
+	response.sendRedirect(request.getContextPath()+"/boardList.jsp");
 %>

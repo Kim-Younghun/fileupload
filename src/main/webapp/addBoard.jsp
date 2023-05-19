@@ -30,7 +30,7 @@
 			
 			<!-- 로그인 사용자 아이디 -->
 			<%
-				// String memberId = (String)session.getAttribute("loginMemberId"); tptusrp
+				// String memberId = (String)session.getAttribute("loginMemberId");
 				String memberId = "test";
 			%>
 			<tr>
