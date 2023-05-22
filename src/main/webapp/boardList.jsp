@@ -12,17 +12,23 @@
 	
 	Class.forName("org.mariadb.jdbc.Driver");
 	Connection conn = DriverManager.getConnection("jdbc:mariadb://127.0.0.1:3306/fileupload", "root", "java1234");
-	String listSql = "SELECT b.board_title boardTitle, f.origin_filename originFilename, f.save_filename saveFilename, f.path" 
+	String listSql = "SELECT b.board_no boardNo, b.board_title boardTitle, b.member_id memberId, b.createdate createdate, b.updatedate updatedate,"
+			+ " f.board_file_no boardFileNo, f.origin_filename originFilename, f.save_filename saveFilename, f.path"
 			+ " FROM board b INNER JOIN board_file f ON b.board_no = f.board_no ORDER BY b.createdate DESC";
 	PreparedStatement listStmt = conn.prepareStatement(listSql);
 	ResultSet listRs = listStmt.executeQuery();
 	ArrayList<HashMap<String, Object>> list = new ArrayList<>();
 	while(listRs.next()) {
 		HashMap<String, Object> m = new HashMap<>();
+		m.put("boardNo", listRs.getInt("boardNo"));
 		m.put("boardTitle", listRs.getString("boardTitle"));
+		m.put("memberId", listRs.getString("memberId"));
+		m.put("boardFileNo", listRs.getString("boardFileNo"));
 		m.put("originFilename", listRs.getString("originFilename"));
 		m.put("saveFilename", listRs.getString("saveFilename"));
 		m.put("path", listRs.getString("path"));
+		m.put("updatedate", listRs.getString("updatedate"));
+		m.put("createdate", listRs.getString("createdate"));
 		list.add(m);
 	}
 %>   
@@ -38,6 +44,11 @@
 		<tr>
 			<td>boardTitle</td>
 			<td>originFilename</td>
+			<td>memberId</td>
+			<td>updatedate</td>
+			<td>createdate</td>
+			<td>수정</td>
+			<td>삭제</td>
 		</tr>
 		<%
 			for(HashMap<String, Object> m : list) {
@@ -50,6 +61,11 @@
 					<%=(String)m.get("originFilename")%>
 					</a>
 				</td>
+				<td><%=(String)m.get("memberId")%></td>
+				<td><%=(String)m.get("updatedate")%></td>
+				<td><%=(String)m.get("createdate")%></td>
+				<td><a href="<%=request.getContextPath()%>/modifyBoard.jsp?boardNo=<%=m.get("boardNo")%>&boardFileNo=<%=m.get("boardFileNo")%>">수정</a></td>
+				<td><a href="<%=request.getContextPath()%>/removeBoard.jsp?boardNo=<%=m.get("boardNo")%>&boardFileNo=<%=m.get("boardFileNo")%>">삭제</a></td>
 			</tr>
 		<%
 			}
