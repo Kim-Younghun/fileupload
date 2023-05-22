@@ -11,9 +11,11 @@
 	int max = 10 * 1024 * 1024;	
 	MultipartRequest mRequest = new MultipartRequest(request, dir, max, "utf-8", new DefaultFileRenamePolicy());
 	
+	String saveFilename = mRequest.getParameter("saveFilename");
 	int boardNo = Integer.parseInt(mRequest.getParameter("boardNo"));
 	int boardFileNo = Integer.parseInt(mRequest.getParameter("boardFileNo"));
 	
+	System.out.println(saveFilename + "removeBoardAcion saveFilename");
 	System.out.println(boardNo + "removeBoardAcion boardNo");
 	System.out.println(boardFileNo + "removeBoardAcion boardFileNo");
 	
@@ -32,8 +34,8 @@
 	System.out.println(row + "removeBoardAcion row");
 	
 	if(row==1) {
-		String saveFilename = mRequest.getFilesystemName("saveFilename");
 		File f = new File(dir +"\\"+ saveFilename);
+		System.out.println(f + "removeBoardAcion f");
 		if(f.exists()) {
 			f.delete();
 			System.out.println(saveFilename+"PDF파일 삭제");
